@@ -1,0 +1,123 @@
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+  <title>Discounts</title>
+  <style>
+    .row{
+      height: 100vh;
+    }
+    .modal-body{
+      height: 250px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+ 
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="row justify-content-center  text-center px-4">
+      <div class="col-md-4 my-auto mx-4">
+        <h4 class="text-lead mb-4">Discount Checker</h4>
+        <form id="form" action = "#">
+          <div class="mb-3">
+            <label for="member-code" class="form-label">Member Code</label>
+            <input required type="password" class="form-control" id="member-code" name="memberCode" >
+          </div>
+          <div class="mb-3">
+            <label for="discount-provider-code" class="form-label">Discount Provider Code</label>
+            <input required type="password" class="form-control" id="discount-provider-code" name="discountProviderCode" >
+          </div>
+          <div class="mb-3">
+            <label for="amount" class="form-label">Cost Before Discount</label>
+            <input required type="number" class = "form-control" id="amount" name = "amount">
+          </div>
+          <button type="submit" class="btn btn-primary px-5 mt-3" >Submit</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Code Modal -->
+  <div class="modal fade" id="codeModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h4 class = "modal-title fs-5">Get Member Discount</h4>
+        </div>
+        <div class="modal-body text-center">
+          <div id="loading" class=" spinner-border text-warning" role="status">
+            <span class="visually-hidden">Loading...</span>
+          </div>
+          <div id="error" class="error text-danger">
+            An error occured
+          </div>
+          <div id="response">
+          </div>
+        </div>
+        <div class = "modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+  
+  <script>
+    let codeModal =  new bootstrap.Modal('#codeModal')
+    let form = document.getElementById("form");
+    form.addEventListener("submit", handleSubmit)
+    let memberCode = document.getElementById("member-code")
+    let discountProviderCode = document.getElementById("discount-provider-code")
+    let amount = document.getElementById("amount")
+
+    async function handleSubmit(e){
+      e.preventDefault()
+      codeModal.show()
+      let errDiv = document.getElementById("error");
+      let responseDiv = document.getElementById("response")
+      let loadingDiv =  document.getElementById("loading")
+
+      errDiv.classList.add("d-none")
+      responseDiv.innerHTML = ""
+      loadingDiv.classList.remove("d-none")
+
+      try {
+        let data = await fetchDiscount();
+        let html = "Discount info from backend goes here."
+        errDiv.classList.add("d-none")
+        responseDiv.innerHTML = html
+        loadingDiv.classList.add("d-none")
+      
+      } catch(err){
+        console.error(err)
+        errDiv.classList.remove("d-none")
+        responseDiv.innerHTML = ""
+        loadingDiv.classList.add("d-none")
+      
+      }
+      
+    }
+
+    async function fetchDiscount() {
+      const response = await fetch("https://api.growthspringers.com", {
+        method: "POST",
+        headers: {
+          "Content-Type" : "application/json"
+        },
+        body: JSON.stringify({
+          memberCode: memberCode.value,
+          discountProviderCode: discountProviderCode.value,
+          amount: amount.value
+        })
+      })
+      const data = await response.json()
+      return data
+    }
+  </script>
+</body>
+</html>
